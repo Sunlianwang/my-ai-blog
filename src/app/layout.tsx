@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   },
   description: '记录 AI 使用和开发技巧的个人博客，涵盖大模型应用、Prompt Engineering、AI 工具使用心得等。',
   keywords: ['AI', '人工智能', '大模型', 'LLM', 'Prompt Engineering', 'ChatGPT', '技术博客'],
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
