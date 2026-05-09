@@ -75,12 +75,23 @@ tags: ["标签1", "标签2"]
 这里是正文内容...
 ```
 
-### 部署到 GitHub Pages
+### 部署到 GitHub Pages（自定义域名）
 
-1. 在 GitHub 上创建仓库
-2. 推送代码到 `main` 分支
-3. 进入仓库 Settings → Pages → Source 选择 **GitHub Actions**
-4. 每次推送代码会自动构建和部署
+1. **编辑 `public/CNAME`** — 把里面的内容改为你的域名，如 `sunlian.com`
+2. **在 GitHub 上创建仓库**
+   ```bash
+   git remote add origin https://github.com/Sunlianwang/仓库名.git
+   git push -u origin main
+   ```
+3. **配置 GitHub Pages**
+   - 进入 GitHub 仓库 → Settings → Pages
+   - Source 选择 **GitHub Actions**（工作流已配置好）
+   - 在 Custom domain 处填上你的域名
+4. **配置 DNS**
+   - 在你的域名管理后台添加 **CNAME 记录**，指向 `Sunlianwang.github.io`
+5. **推送后等待 2-3 分钟**，GitHub Actions 自动构建部署 🎉
+
+> ⚠️ `.env.local`（含 DeepSeek API Key）在 `.gitignore` 中，不会上传。如需 CI 中自动翻译，在仓库 Settings → Secrets → Actions 添加 `DEEPSEEK_API_KEY`
 
 ## 📊 Mermaid 图表
 
