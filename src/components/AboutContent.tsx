@@ -8,6 +8,29 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 export default function AboutContent() {
   const { t, locale } = useI18n()
   const [modal, setModal] = useState<{ type: 'email' | 'wechat' } | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
+
+  const handleCopy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setModal(null)
+      setToast(label)
+      setTimeout(() => setToast(null), 2000)
+    } catch {
+      // Fallback for older browsers / HTTP
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.style.position = 'fixed'
+      ta.style.left = '-9999px'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+      setModal(null)
+      setToast(label)
+      setTimeout(() => setToast(null), 2000)
+    }
+  }
 
   const topics = [
     { emoji: '🤖', key: 'about.topic1' as const },
@@ -147,20 +170,26 @@ export default function AboutContent() {
               </p>
               <div className="mt-5 pt-4 border-t border-border/40">
                 <button
-                  onClick={() => {
-                    if (modal.type === 'email') {
-                      navigator.clipboard?.writeText('1958232837@qq.com')
-                    } else {
-                      navigator.clipboard?.writeText('u15055522256')
-                    }
-                    setModal(null)
-                  }}
+                  onClick={() => handleCopy(
+                    modal.type === 'email' ? '1958232837@qq.com' : 'u15055522256',
+                    modal.type === 'email' ? '邮箱' : '微信号'
+                  )}
                   className="text-xs font-mono px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                 >
                   {modal.type === 'email' ? t('about.copyEmail') : t('about.copyWechat')}
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-foreground text-background text-sm font-mono px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2">
+            <span>✓</span>
+            <span>{locale === 'zh' ? `复制${toast}成功` : `${toast} copied`}</span>
           </div>
         </div>
       )}
