@@ -1,0 +1,65 @@
+<p>When writing technical articles, a good architecture diagram is worth a thousand words. Mermaid is a tool that uses text-based code to create diagrams, making it perfect for use in Markdown blogs.</p>
+<h2>What is Mermaid?</h2>
+<p>Mermaid is a JavaScript-based diagramming tool that allows you to create various charts using simple syntax similar to Markdown:</p>
+<ul>
+<li>Flowchart</li>
+<li>Sequence Diagram</li>
+<li>State Diagram</li>
+<li>Gantt Chart</li>
+<li>Entity Relationship (ER) Diagram</li>
+</ul>
+<h2>Example: AI Application Architecture</h2>
+<p>Below is a typical AI application architecture diagram:</p>
+<pre><code class="language-mermaid">graph LR
+    A["User Input"] --> B["Prompt Template"]
+    B --> C["LLM Large Model"]
+    C --> D["Result Parsing"]
+    D --> E["Business Logic"]
+    E --> F["Return to User"]
+</code></pre>
+<h2>Example: AI Agent Workflow</h2>
+<p>A typical workflow for an AI Agent:</p>
+<pre><code class="language-mermaid">graph LR
+    A["Receive Task"] --> B{"Need Tools?"}
+    B -->|"Yes"| C["Select Tool"]
+    C --> D["Call Tool"]
+    D --> E["Get Result"]
+    E --> B
+    B -->|"No"| F["Generate Answer"]
+    F --> G["Return Result"]
+</code></pre>
+<h2>Example: User Authentication Sequence Diagram</h2>
+<p>A typical user login sequence:</p>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant B as Backend
+    participant D as Database
+
+    U->>F: Enter username and password
+    F->>B: POST /api/login
+    B->>D: Query user
+    D-->>B: Return user info
+    B-->>F: Return JWT Token
+    F-->>U: Login successful
+</code></pre>
+<h2>How to Use in a Blog?</h2>
+<p>In a Markdown file, just use three backticks followed by <code>mermaid</code>:</p>
+<pre><code>```mermaid
+graph LR
+    A["Start"] --> B["End"]
+```
+</code></pre>
+<p>It's that simple! The blog framework will automatically render it into a beautiful diagram.</p>
+<h2>Tips</h2>
+<ol>
+<li><strong>Keep it simple</strong> — Don't use too many nodes in a diagram; 7-10 is optimal.</li>
+<li><strong>Use meaningful text</strong> — Node labels should be self-explanatory.</li>
+<li><strong>Choose the right diagram type</strong> — Use flowcharts for processes and sequence diagrams for interactions.</li>
+<li><strong>Pay attention to direction</strong> — <code>LR</code> means left to right, <code>TD</code> means top to bottom.</li>
+</ol>
+<h2>Summary</h2>
+<p>Mermaid is a great helper for technical writers. Drawing diagrams with text-based code makes version control easy and ensures consistency between diagrams and articles.</p>
+<p>I suggest that when writing technical blogs, if you encounter a complex process, draw a Mermaid diagram — your readers will thank you!</p>
+<hr>
+<p><em>In my next article, I plan to share how to build a simple AI Agent using LangChain.</em></p>

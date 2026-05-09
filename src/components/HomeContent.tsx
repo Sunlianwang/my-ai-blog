@@ -1,0 +1,253 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useI18n } from '@/components/I18nProvider'
+import { getLocalizedTitle, getLocalizedSummary, getLocalizedTags } from '@/lib/post-locale'
+import type { PostMeta } from '@/lib/posts'
+
+interface HomeContentProps {
+  posts: PostMeta[]
+}
+
+export default function HomeContent({ posts }: HomeContentProps) {
+  const { t, locale } = useI18n()
+
+  const text1 = t('home.greeting')
+  const text2 = t('home.greeting2')
+  const text3 = t('home.greeting3')
+  const text4 = t('home.greeting4')
+
+  const str1 = text1
+  const str2 = ' ' + text2 + ' '
+  const str3 = text3
+  const str4 = ' ' + text4
+
+  const totalLength = str1.length + str2.length + str3.length + str4.length
+
+  const [visibleCount, setVisibleCount] = useState(0)
+  const [isTyping, setIsTyping] = useState(true)
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout
+    if (isTyping) {
+      if (visibleCount < totalLength) {
+        timeout = setTimeout(() => setVisibleCount(v => v + 1), 150)
+      } else {
+        timeout = setTimeout(() => setIsTyping(false), 3500)
+      }
+    } else {
+      if (visibleCount > 0) {
+        timeout = setTimeout(() => setVisibleCount(v => v - 1), 50)
+      } else {
+        timeout = setTimeout(() => setIsTyping(true), 800)
+      }
+    }
+    return () => clearTimeout(timeout)
+  }, [visibleCount, isTyping, totalLength])
+
+  const getSub = (str: string, offset: number) => 
+    str.slice(0, Math.max(0, visibleCount - offset))
+
+  const pinnedPost = posts.find(p => p.pinned)
+  const regularPosts = pinnedPost ? posts.filter(p => p.slug !== pinnedPost.slug) : posts
+
+  const tags = [
+    { key: 'home.tags' as const },
+    { key: 'home.tags2' as const },
+    { key: 'home.tags3' as const },
+    { key: 'home.tags4' as const },
+  ]
+
+  return (
+    <div className="space-y-16">
+      {/* Hero Section */}
+      <section className="relative pt-4 pb-8 overflow-hidden">
+        
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-8">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="text-xs font-mono text-muted-foreground tracking-wide uppercase">
+              {t('common.status')}
+            </span>
+          </div>
+
+          <h1 suppressHydrationWarning className="font-editorial text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-3 tracking-tight h-[1.2em] flex items-center">
+            <div>
+              <span className="hero-grad-from">{getSub(str1, 0)}</span>
+              <span className="hero-grad-ordinary">{getSub(str2, str1.length)}</span>
+              <span className="hero-grad-to">{getSub(str3, str1.length + str2.length)}</span>
+              <span className="hero-grad-greatness">{getSub(str4, str1.length + str2.length + str3.length)}</span>
+              <span className="ml-[0.05em] inline-block w-[0.08em] h-[0.9em] bg-foreground animate-pulse align-baseline" style={{ animationDuration: '1s' }} />
+            </div>
+          </h1>
+          <div className="relative max-w-xl mb-8 mt-12 marquee-glow-border">
+            <p className="text-foreground/80 text-lg leading-relaxed px-6 py-4">
+              {t('home.desc')}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span
+                key={tag.key}
+                className="inline-block text-xs font-mono px-2.5 py-1 rounded border border-border text-muted-foreground bg-background hover:border-primary/40 hover:text-foreground transition-colors"
+              >
+                {t(tag.key)}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Decorative AI text */}
+        <div className="absolute -top-4 -right-2 pointer-events-none">
+          <span className="text-8xl sm:text-9xl font-editorial font-black text-foreground/[0.04] select-none tracking-tighter">
+            AI
+          </span>
+        </div>
+      </section>
+
+      <div className="h-px bg-border" />
+
+      {/* Posts List */}
+      <section>
+        <div className="flex items-baseline justify-between mb-8">
+          <h2 className="font-editorial text-2xl font-bold text-foreground">
+            {t('home.articles')}
+          </h2>
+          <span className="text-xs font-mono text-muted-foreground">
+            {posts.length} {t('home.entry')}
+          </span>
+        </div>
+
+        {posts.length === 0 ? (
+          <div className="text-center py-20 border border-dashed border-border rounded-xl">
+            <p className="text-4xl mb-4">✍️</p>
+            <p className="text-muted-foreground text-lg font-editorial">{t('home.empty.title')}</p>
+            <p className="text-muted-foreground/60 text-sm mt-2 font-mono">
+              {t('home.empty.desc')}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-0 divide-y divide-border/60">
+              {/* Pinned Post */}
+              {pinnedPost && (
+                <Link
+                  key={pinnedPost.slug}
+                  href={`/posts/${pinnedPost.slug}`}
+                  className="group block py-6 first:pt-0 last:pb-0 relative"
+                >
+                  {/* Pinned badge — top right corner */}
+                  <span className="absolute top-4 right-0 text-[10px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-sm tracking-wider flex items-center gap-1">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="opacity-70">
+                      <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z" />
+                    </svg>
+                    置顶
+                  </span>
+
+                  <article className="flex items-start gap-5">
+                    <span className="text-xs font-mono text-primary tabular-nums mt-1.5 w-6 text-right flex-shrink-0 flex items-center justify-end">
+                      📌
+                    </span>
+
+                    <div className="flex-1 min-w-0">
+                      <time className="text-xs font-mono text-muted-foreground tracking-wide">
+                        {pinnedPost.date}
+                      </time>
+
+                      <h3 className="font-editorial text-lg font-bold text-foreground mt-1.5 mb-2 group-hover:text-primary transition-colors duration-200 leading-snug">
+                        {getLocalizedTitle(pinnedPost, locale)}
+                      </h3>
+
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-3">
+                        {getLocalizedSummary(pinnedPost, locale)}
+                      </p>
+
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {getLocalizedTags(pinnedPost, locale).map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-block text-[11px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <span className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-8 opacity-0 group-hover:opacity-100">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                      </svg>
+                    </span>
+                  </article>
+                </Link>
+              )}
+
+              {regularPosts.map((post, index) => (
+              <Link
+                key={post.slug}
+                href={`/posts/${post.slug}`}
+                className="group block py-6 first:pt-0 last:pb-0"
+              >
+                <article className="flex items-start gap-5">
+                  <span className="text-xs font-mono text-muted-foreground tabular-nums mt-1.5 w-6 text-right flex-shrink-0 opacity-40 group-hover:opacity-100 transition-opacity">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+
+                  <div className="flex-1 min-w-0">
+                    <time className="text-xs font-mono text-muted-foreground tracking-wide">
+                      {post.date}
+                    </time>
+
+                    <h3 className="font-editorial text-lg font-bold text-foreground mt-1.5 mb-2 group-hover:text-primary transition-colors duration-200 leading-snug">
+                      {getLocalizedTitle(post, locale)}
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-3">
+                      {getLocalizedSummary(post, locale)}
+                    </p>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {getLocalizedTags(post, locale).map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-block text-[11px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <span className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-8 opacity-0 group-hover:opacity-100">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                  </span>
+                </article>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Bottom ornament */}
+      <div className="flex justify-center pt-4">
+        <div className="flex items-center gap-3 text-muted-foreground/30">
+          <div className="w-8 h-px bg-current" />
+          <span className="text-xs font-mono tracking-widest">EOF</span>
+          <div className="w-8 h-px bg-current" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+
+

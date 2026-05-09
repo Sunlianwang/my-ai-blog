@@ -1,0 +1,392 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 30 15% 97%;
+    --foreground: 24 12% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 12% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 12% 11%;
+    --primary: 154 60% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 36 16% 94%;
+    --secondary-foreground: 24 12% 11%;
+    --muted: 36 12% 93%;
+    --muted-foreground: 24 6% 42%;
+    --accent: 24 12% 11%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 24 14% 86%;
+    --input: 24 14% 86%;
+    --ring: 154 60% 28%;
+    --radius: 0.625rem;
+    --link: 155 62% 24%;
+  }
+
+  .dark {
+    --background: 24 15% 6%;
+    --foreground: 30 15% 93%;
+    --card: 24 12% 8%;
+    --card-foreground: 30 15% 93%;
+    --popover: 24 12% 8%;
+    --popover-foreground: 30 15% 93%;
+    --primary: 154 55% 42%;
+    --primary-foreground: 24 15% 6%;
+    --secondary: 24 10% 16%;
+    --secondary-foreground: 30 15% 93%;
+    --muted: 24 10% 16%;
+    --muted-foreground: 24 6% 64%;
+    --accent: 30 15% 93%;
+    --accent-foreground: 24 15% 6%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 24 10% 16%;
+    --input: 24 10% 16%;
+    --ring: 154 55% 42%;
+    --link: 154 55% 48%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(circle at 20% 20%, hsl(var(--primary) / 0.03), transparent 32%),
+      radial-gradient(circle at 80% 80%, hsl(var(--accent) / 0.03), transparent 36%),
+      url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16 0H0V16' stroke='%2300000012' stroke-width='0.3'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.18);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  .font-editorial {
+    font-family: 'Libre Baskerville', 'Noto Sans SC', serif;
+  }
+
+  .font-system {
+    font-family: 'IBM Plex Sans', 'Noto Sans SC', system-ui, sans-serif;
+  }
+
+  .link-like {
+    color: hsl(var(--link));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: hsl(var(--link) / 0.35);
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+
+  .link-like:hover {
+    text-decoration-color: hsl(var(--link));
+  }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes marquee-glow {
+  from { --angle: 0deg; }
+  to { --angle: 360deg; }
+}
+
+.marquee-glow-border {
+  position: relative;
+  border-radius: 14px;
+}
+
+.marquee-glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 0deg,
+    hsl(var(--primary)) 15deg,
+    hsl(160 70% 50% / 0.9) 25deg,
+    hsl(var(--primary) / 0.6) 35deg,
+    transparent 50deg,
+    transparent 180deg,
+    hsl(var(--primary) / 0.25) 200deg,
+    hsl(160 70% 50% / 0.15) 215deg,
+    transparent 230deg,
+    transparent 360deg
+  );
+  animation: marquee-glow 2.5s linear infinite;
+  z-index: 0;
+  filter: blur(1px);
+}
+
+.marquee-glow-border::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 12px;
+  background: hsl(var(--background) / 0.85);
+  box-shadow: inset 0 0 20px hsl(var(--primary) / 0.04);
+  z-index: 1;
+}
+
+.marquee-glow-border > * {
+  position: relative;
+  z-index: 2;
+}
+
+@layer components {
+  .prose {
+    @apply text-foreground/90 leading-[1.85];
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    font-family: 'Libre Baskerville', 'Noto Sans SC', serif;
+    letter-spacing: -0.01em;
+  }
+
+  .prose h1 {
+    @apply text-3xl font-bold text-foreground mt-12 mb-5;
+  }
+
+  .prose h2 {
+    @apply text-2xl font-bold text-foreground mt-12 mb-4 pb-3 border-b border-border;
+  }
+
+  .prose h3 {
+    @apply text-xl font-semibold text-foreground mt-8 mb-3;
+  }
+
+  .prose p {
+    @apply mb-6 leading-8;
+  }
+
+  .prose a {
+    color: hsl(var(--link));
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: hsl(var(--link) / 0.35);
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+
+  .prose a:hover {
+    text-decoration-color: hsl(var(--link));
+  }
+
+  .prose ul {
+    @apply list-disc mb-6 space-y-2 pl-5;
+  }
+
+  .prose ol {
+    @apply list-decimal mb-6 space-y-2 pl-5;
+  }
+
+  .prose li::marker {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .prose li {
+    @apply leading-8;
+  }
+
+  .prose li > p {
+    @apply mb-2;
+  }
+
+  .prose strong {
+    @apply font-semibold;
+  }
+
+  .prose blockquote {
+    @apply border-l-[3px] border-primary/50 pl-5 my-8 bg-transparent text-foreground;
+  }
+
+  .prose blockquote p:last-child {
+    @apply mb-0;
+  }
+
+  .prose hr {
+    @apply my-12 border-border;
+  }
+
+  .prose code {
+    @apply bg-muted text-foreground px-1.5 py-0.5 rounded-[6px] text-[0.82rem] font-mono;
+  }
+
+  .prose pre {
+    @apply bg-card text-foreground border border-border rounded-xl p-5 my-8 overflow-x-auto;
+    box-shadow:
+      inset 0 1px 0 hsl(var(--border)),
+      0 10px 25px -16px hsl(var(--foreground) / 0.08);
+  }
+
+  .prose pre code {
+    @apply bg-transparent text-inherit p-0 text-[0.88rem] leading-6;
+  }
+
+  .prose img {
+    @apply rounded-xl border border-border my-8 mx-auto max-w-full;
+    box-shadow: 0 10px 28px -18px hsl(var(--foreground) / 0.16);
+  }
+
+  .prose table {
+    @apply w-full border-collapse my-8 text-sm;
+  }
+
+  .prose th {
+    @apply bg-muted/60 text-left px-4 py-3 font-semibold border border-border;
+  }
+
+  .prose td {
+    @apply px-4 py-3 border border-border;
+  }
+
+  .prose tr:last-child td {
+    @apply border-b border-border;
+  }
+}
+
+/* ── Hero gradient text ── */
+.hero-grad-from {
+  background: linear-gradient(135deg, hsl(var(--muted-foreground)), hsl(var(--muted-foreground) / 0.6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-grad-ordinary {
+  background: linear-gradient(135deg, hsl(var(--muted-foreground) / 0.5), hsl(var(--primary) / 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-grad-to {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.7), hsl(var(--primary)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-grad-greatness {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(154 70% 42%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Staircase illustration (right side) ── */
+.stair-illustration {
+  animation: stair-illustration-fade-in 1s ease-out both;
+}
+
+@keyframes stair-illustration-fade-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Figure walks step-by-step along the staircase, no floating */
+.stair-figure {
+  animation: figure-climb 6s ease-in-out infinite;
+}
+
+@keyframes figure-climb {
+  0%   { transform: translate(230px, 216px); opacity: 0; }
+  4%   { opacity: 0.55; }
+  /* Stand on step 1 (bottom, y=236) */
+  10%  { transform: translate(230px, 216px); }
+  /* Walk to step 2 (y=210) */
+  18%  { transform: translate(210px, 190px); }
+  /* Walk to step 3 (y=184) */
+  26%  { transform: translate(190px, 164px); }
+  /* Walk to step 4 (y=158) */
+  34%  { transform: translate(170px, 138px); }
+  /* Walk to step 5 (y=132) */
+  42%  { transform: translate(150px, 112px); }
+  /* Walk to step 6 (y=106) */
+  50%  { transform: translate(130px, 86px); }
+  /* Walk to step 7 (y=80) */
+  58%  { transform: translate(120px, 60px); }
+  /* Walk to step 8 (top, y=54) — reach the flag! */
+  66%  { transform: translate(105px, 34px); }
+  /* Hold at top */
+  82%  { opacity: 0.55; }
+  90%  { opacity: 0.25; }
+  100% { transform: translate(105px, 34px); opacity: 0; }
+}
+
+/* Arm and leg swing to simulate walking */
+.stair-figure line:nth-child(3) { /* left arm */
+  animation: arm-swing-l 0.6s ease-in-out infinite alternate;
+}
+.stair-figure line:nth-child(4) { /* right arm */
+  animation: arm-swing-r 0.6s ease-in-out infinite alternate;
+}
+.stair-figure line:nth-child(5) { /* left leg */
+  animation: leg-swing-l 0.6s ease-in-out infinite alternate;
+}
+.stair-figure line:nth-child(6) { /* right leg */
+  animation: leg-swing-r 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes arm-swing-l {
+  0%   { transform: rotate(-8deg); }
+  100% { transform: rotate(8deg); }
+}
+@keyframes arm-swing-r {
+  0%   { transform: rotate(8deg); }
+  100% { transform: rotate(-8deg); }
+}
+@keyframes leg-swing-l {
+  0%   { transform: rotate(-6deg); }
+  100% { transform: rotate(6deg); }
+}
+@keyframes leg-swing-r {
+  0%   { transform: rotate(6deg); }
+  100% { transform: rotate(-6deg); }
+}
+
+/* Flag gently waves at the top */
+.stair-flag-top {
+  animation: flag-wave 2.5s ease-in-out infinite;
+}
+
+@keyframes flag-wave {
+  0%, 100% { transform-origin: 90px 54px; transform: rotate(0deg); }
+  50%      { transform-origin: 90px 54px; transform: rotate(3deg); }
+}
+
+/* ── Scroll progress bar ── */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  z-index: 100;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary) / 0.6),
+    hsl(154 70% 42%),
+    hsl(var(--primary))
+  );
+  border-radius: 0 2px 2px 0;
+  transition: width 0.08s linear;
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.35);
+}
