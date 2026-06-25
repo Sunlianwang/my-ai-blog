@@ -61,35 +61,6 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
 
   return (
     <div className="max-w-none">
-      {/* Header */}
-      <div className="mb-14">
-        <div className="flex items-center gap-2 mb-8">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-          </span>
-          <span className="text-xs font-mono text-muted-foreground tracking-wide uppercase">
-            {t('common.status')}
-          </span>
-        </div>
-
-        <h1 className="font-editorial text-3xl sm:text-4xl font-bold text-foreground mb-3 tracking-tight">
-          {t('archive.title')}
-        </h1>
-        <p className="text-muted-foreground text-lg leading-relaxed max-w-xl mb-2">
-          {t('archive.desc')}
-        </p>
-        <span className="text-xs font-mono text-muted-foreground">
-          {t('archive.total')} {posts.length} {t('archive.count')}
-        </span>
-
-        <div className="flex items-center gap-3 mt-8">
-          <div className="flex-1 h-px bg-gradient-to-r from-border via-border/60 to-transparent" />
-          <span className="text-[10px] font-mono text-muted-foreground/40 tracking-widest">TIMELINE</span>
-          <div className="flex-1 h-px bg-gradient-to-l from-border via-border/60 to-transparent" />
-        </div>
-      </div>
-
       {yearGroups.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-border rounded-xl">
           <p className="text-4xl mb-4">📂</p>
