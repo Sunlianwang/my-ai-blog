@@ -1,6 +1,5 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/components/I18nProvider'
 import { getLocalizedTitle, getLocalizedSummary, getLocalizedTags } from '@/lib/post-locale'
@@ -13,63 +12,11 @@ interface HomeContentProps {
 export default function HomeContent({ posts }: HomeContentProps) {
   const { t, locale } = useI18n()
 
-  const zhWords = ['走向伟大', '创造未来', '改变世界', '无限可能']
-  const enWords = ['To Greatness', 'Create the Future', 'Change the World', 'Infinite Possibilities']
-  const words = locale === 'zh' ? zhWords : enWords
-
-  const [currentWord, setCurrentWord] = useState(0)
-  const [fadeClass, setFadeClass] = useState('hero-word-cycle')
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFadeClass('')
-      setTimeout(() => {
-        setCurrentWord((prev) => (prev + 1) % words.length)
-        setFadeClass('hero-word-cycle')
-      }, 300)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [words.length])
-
   const pinnedPost = posts.find(p => p.pinned)
   const regularPosts = pinnedPost ? posts.filter(p => p.slug !== pinnedPost.slug) : posts
 
-  const tags = [
-    { key: 'home.tags' as const },
-    { key: 'home.tags2' as const },
-    { key: 'home.tags3' as const },
-    { key: 'home.tags4' as const },
-  ]
-
   return (
     <div className="space-y-16">
-      {/* Hero Section */}
-      <section className="relative pt-4 pb-8 overflow-hidden">
-        <div className="relative z-10">
-          <h1 suppressHydrationWarning className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6 tracking-tight text-foreground">
-            {locale === 'zh' ? '从平凡' : 'From Ordinary'}
-            <br />
-            <span className={fadeClass}>{words[currentWord]}</span>
-          </h1>
-          <p className="text-muted-foreground text-lg leading-relaxed max-w-xl mb-8">
-            {t('home.desc')}
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span
-                key={tag.key}
-                className="inline-block text-xs px-2.5 py-1 rounded border border-border text-muted-foreground bg-background hover:border-foreground/20 hover:text-foreground transition-colors"
-              >
-                {t(tag.key)}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="h-px bg-border" />
-
       {/* Posts List */}
       <section>
         <div className="flex items-baseline justify-between mb-8">

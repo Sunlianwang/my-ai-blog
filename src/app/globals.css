@@ -93,16 +93,6 @@
   }
 }
 
-/* Hero word-cycle animation */
-@keyframes hero-word-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.hero-word-cycle {
-  animation: hero-word-in 0.5s ease-out forwards;
-}
-
 @layer components {
   .prose {
     @apply text-foreground/90 leading-[1.85];
