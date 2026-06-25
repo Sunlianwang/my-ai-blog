@@ -2,54 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
 @layer base {
   :root {
-    --background: 30 15% 97%;
-    --foreground: 24 12% 11%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 24 12% 11%;
+    --card-foreground: 0 0% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 24 12% 11%;
-    --primary: 154 60% 28%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 36 16% 94%;
-    --secondary-foreground: 24 12% 11%;
-    --muted: 36 12% 93%;
-    --muted-foreground: 24 6% 42%;
-    --accent: 24 12% 11%;
-    --accent-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 24 14% 86%;
-    --input: 24 14% 86%;
-    --ring: 154 60% 28%;
-    --radius: 0.625rem;
-    --link: 155 62% 24%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
+    --radius: 0.5rem;
+    --link: 0 0% 9%;
   }
 
   .dark {
-    --background: 24 15% 6%;
-    --foreground: 30 15% 93%;
-    --card: 24 12% 8%;
-    --card-foreground: 30 15% 93%;
-    --popover: 24 12% 8%;
-    --popover-foreground: 30 15% 93%;
-    --primary: 154 55% 42%;
-    --primary-foreground: 24 15% 6%;
-    --secondary: 24 10% 16%;
-    --secondary-foreground: 30 15% 93%;
-    --muted: 24 10% 16%;
-    --muted-foreground: 24 6% 64%;
-    --accent: 30 15% 93%;
-    --accent-foreground: 24 15% 6%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 95%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 24 10% 16%;
-    --input: 24 10% 16%;
-    --ring: 154 55% 42%;
-    --link: 154 55% 48%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 95%;
+    --link: 0 0% 95%;
   }
 
   * {
@@ -62,93 +62,45 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    background-image:
-      radial-gradient(circle at 20% 20%, hsl(var(--primary) / 0.03), transparent 32%),
-      radial-gradient(circle at 80% 80%, hsl(var(--accent) / 0.03), transparent 36%),
-      url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M16 0H0V16' stroke='%2300000012' stroke-width='0.3'/%3E%3C/svg%3E");
   }
 
   ::selection {
-    background-color: hsl(var(--primary) / 0.18);
+    background-color: rgba(0, 0, 0, 0.12);
     color: hsl(var(--foreground));
   }
 }
 
 @layer utilities {
   .font-editorial {
-    font-family: 'Libre Baskerville', 'Noto Sans SC', serif;
+    font-family: 'Inter', 'Noto Sans SC', sans-serif;
   }
 
   .font-system {
-    font-family: 'IBM Plex Sans', 'Noto Sans SC', system-ui, sans-serif;
+    font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
   }
 
   .link-like {
-    color: hsl(var(--link));
+    color: hsl(var(--foreground));
     text-decoration: underline;
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
-    text-decoration-color: hsl(var(--link) / 0.35);
+    text-decoration-color: hsl(var(--foreground) / 0.3);
     transition: color 0.15s ease, text-decoration-color 0.15s ease;
   }
 
   .link-like:hover {
-    text-decoration-color: hsl(var(--link));
+    text-decoration-color: hsl(var(--foreground));
   }
 }
 
-@property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
+/* Hero word-cycle animation */
+@keyframes hero-word-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes marquee-glow {
-  from { --angle: 0deg; }
-  to { --angle: 360deg; }
-}
-
-.marquee-glow-border {
-  position: relative;
-  border-radius: 14px;
-}
-
-.marquee-glow-border::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 16px;
-  background: conic-gradient(
-    from var(--angle),
-    transparent 0deg,
-    hsl(var(--primary)) 15deg,
-    hsl(160 70% 50% / 0.9) 25deg,
-    hsl(var(--primary) / 0.6) 35deg,
-    transparent 50deg,
-    transparent 180deg,
-    hsl(var(--primary) / 0.25) 200deg,
-    hsl(160 70% 50% / 0.15) 215deg,
-    transparent 230deg,
-    transparent 360deg
-  );
-  animation: marquee-glow 2.5s linear infinite;
-  z-index: 0;
-  filter: blur(1px);
-}
-
-.marquee-glow-border::after {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  border-radius: 12px;
-  background: hsl(var(--background) / 0.85);
-  box-shadow: inset 0 0 20px hsl(var(--primary) / 0.04);
-  z-index: 1;
-}
-
-.marquee-glow-border > * {
-  position: relative;
-  z-index: 2;
+.hero-word-cycle {
+  animation: hero-word-in 0.5s ease-out forwards;
 }
 
 @layer components {
@@ -160,8 +112,8 @@
   .prose h2,
   .prose h3,
   .prose h4 {
-    font-family: 'Libre Baskerville', 'Noto Sans SC', serif;
-    letter-spacing: -0.01em;
+    font-family: 'Inter', 'Noto Sans SC', sans-serif;
+    letter-spacing: -0.02em;
   }
 
   .prose h1 {

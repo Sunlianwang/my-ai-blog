@@ -13,41 +13,23 @@ interface HomeContentProps {
 export default function HomeContent({ posts }: HomeContentProps) {
   const { t, locale } = useI18n()
 
-  const text1 = t('home.greeting')
-  const text2 = t('home.greeting2')
-  const text3 = t('home.greeting3')
-  const text4 = t('home.greeting4')
+  const zhWords = ['走向伟大', '创造未来', '改变世界', '无限可能']
+  const enWords = ['To Greatness', 'Create the Future', 'Change the World', 'Infinite Possibilities']
+  const words = locale === 'zh' ? zhWords : enWords
 
-  const str1 = text1
-  const str2 = ' ' + text2 + ' '
-  const str3 = text3
-  const str4 = ' ' + text4
-
-  const totalLength = str1.length + str2.length + str3.length + str4.length
-
-  const [visibleCount, setVisibleCount] = useState(0)
-  const [isTyping, setIsTyping] = useState(true)
+  const [currentWord, setCurrentWord] = useState(0)
+  const [fadeClass, setFadeClass] = useState('hero-word-cycle')
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout
-    if (isTyping) {
-      if (visibleCount < totalLength) {
-        timeout = setTimeout(() => setVisibleCount(v => v + 1), 150)
-      } else {
-        timeout = setTimeout(() => setIsTyping(false), 3500)
-      }
-    } else {
-      if (visibleCount > 0) {
-        timeout = setTimeout(() => setVisibleCount(v => v - 1), 50)
-      } else {
-        timeout = setTimeout(() => setIsTyping(true), 800)
-      }
-    }
-    return () => clearTimeout(timeout)
-  }, [visibleCount, isTyping, totalLength])
-
-  const getSub = (str: string, offset: number) => 
-    str.slice(0, Math.max(0, visibleCount - offset))
+    const interval = setInterval(() => {
+      setFadeClass('')
+      setTimeout(() => {
+        setCurrentWord((prev) => (prev + 1) % words.length)
+        setFadeClass('hero-word-cycle')
+      }, 300)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [words.length])
 
   const pinnedPost = posts.find(p => p.pinned)
   const regularPosts = pinnedPost ? posts.filter(p => p.slug !== pinnedPost.slug) : posts
@@ -63,51 +45,26 @@ export default function HomeContent({ posts }: HomeContentProps) {
     <div className="space-y-16">
       {/* Hero Section */}
       <section className="relative pt-4 pb-8 overflow-hidden">
-        
-
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-xs font-mono text-muted-foreground tracking-wide uppercase">
-              {t('common.status')}
-            </span>
-          </div>
-
-          <h1 suppressHydrationWarning className="font-editorial text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] mb-3 tracking-tight h-[1.2em] flex items-center">
-            <div>
-              <span className="hero-grad-from">{getSub(str1, 0)}</span>
-              <span className="hero-grad-ordinary">{getSub(str2, str1.length)}</span>
-              <span className="hero-grad-to">{getSub(str3, str1.length + str2.length)}</span>
-              <span className="hero-grad-greatness">{getSub(str4, str1.length + str2.length + str3.length)}</span>
-              <span className="ml-[0.05em] inline-block w-[0.08em] h-[0.9em] bg-foreground animate-pulse align-baseline" style={{ animationDuration: '1s' }} />
-            </div>
+          <h1 suppressHydrationWarning className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6 tracking-tight text-foreground">
+            {locale === 'zh' ? '从平凡' : 'From Ordinary'}
+            <br />
+            <span className={fadeClass}>{words[currentWord]}</span>
           </h1>
-          <div className="relative max-w-xl mb-8 mt-12 marquee-glow-border">
-            <p className="text-foreground/80 text-lg leading-relaxed px-6 py-4">
-              {t('home.desc')}
-            </p>
-          </div>
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-xl mb-8">
+            {t('home.desc')}
+          </p>
 
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <span
                 key={tag.key}
-                className="inline-block text-xs font-mono px-2.5 py-1 rounded border border-border text-muted-foreground bg-background hover:border-primary/40 hover:text-foreground transition-colors"
+                className="inline-block text-xs px-2.5 py-1 rounded border border-border text-muted-foreground bg-background hover:border-foreground/20 hover:text-foreground transition-colors"
               >
                 {t(tag.key)}
               </span>
             ))}
           </div>
-        </div>
-
-        {/* Decorative AI text */}
-        <div className="absolute -top-4 -right-2 pointer-events-none">
-          <span className="text-8xl sm:text-9xl font-editorial font-black text-foreground/[0.04] select-none tracking-tighter">
-            AI
-          </span>
         </div>
       </section>
 
@@ -116,7 +73,7 @@ export default function HomeContent({ posts }: HomeContentProps) {
       {/* Posts List */}
       <section>
         <div className="flex items-baseline justify-between mb-8">
-          <h2 className="font-editorial text-2xl font-bold text-foreground">
+          <h2 className="text-2xl font-bold text-foreground">
             {t('home.articles')}
           </h2>
           <span className="text-xs font-mono text-muted-foreground">

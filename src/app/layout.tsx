@@ -27,7 +27,7 @@ export default function RootLayout({
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col font-system">
+      <body className="min-h-screen flex flex-col font-sans">
         <I18nProvider>
           <Header posts={posts} />
           <main className="flex-1 max-w-3xl w-full mx-auto px-5 sm:px-8 py-10 sm:py-14">

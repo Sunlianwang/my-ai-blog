@@ -43,9 +43,8 @@ module.exports = {
         link: 'hsl(var(--link))',
       },
       fontFamily: {
-        sans: ['"IBM Plex Sans"', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
-        serif: ['"Libre Baskerville"', '"Noto Sans SC"', 'Georgia', 'serif'],
-        mono: ['"IBM Plex Mono"', '"JetBrains Mono"', 'Fira Code', 'monospace'],
+        sans: ['"Inter"', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', '"JetBrains Mono"', 'monospace'],
       },
       borderRadius: {
         lg: 'var(--radius)',
