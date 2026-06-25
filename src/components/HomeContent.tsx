@@ -19,15 +19,6 @@ export default function HomeContent({ posts }: HomeContentProps) {
     <div className="space-y-16">
       {/* Posts List */}
       <section>
-        <div className="flex items-baseline justify-between mb-8">
-          <h2 className="text-2xl font-bold text-foreground">
-            {t('home.articles')}
-          </h2>
-          <span className="text-xs font-mono text-muted-foreground">
-            {posts.length} {t('home.entry')}
-          </span>
-        </div>
-
         {posts.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-border rounded-xl">
             <p className="text-4xl mb-4">✍️</p>
@@ -139,15 +130,6 @@ export default function HomeContent({ posts }: HomeContentProps) {
           </div>
         )}
       </section>
-
-      {/* Bottom ornament */}
-      <div className="flex justify-center pt-4">
-        <div className="flex items-center gap-3 text-muted-foreground/30">
-          <div className="w-8 h-px bg-current" />
-          <span className="text-xs font-mono tracking-widest">EOF</span>
-          <div className="w-8 h-px bg-current" />
-        </div>
-      </div>
     </div>
   )
 }
