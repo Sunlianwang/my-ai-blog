@@ -105,6 +105,76 @@ export default function PostContent({ html }: PostContentProps) {
     }
   }, [html])
 
+  // Add copy buttons to all code blocks after render
+  useEffect(() => {
+    const proseEl = document.querySelector('.prose')
+    if (!proseEl) return
+
+    const pres = proseEl.querySelectorAll('pre')
+    pres.forEach((pre) => {
+      if (pre.querySelector('.copy-btn')) return
+
+      pre.style.position = 'relative'
+
+      const code = pre.querySelector('code')
+      if (!code) return
+
+      const btn = document.createElement('button')
+      btn.className = 'copy-btn'
+      btn.textContent = '复制'
+      btn.style.cssText = `
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-family: 'Inter', system-ui, sans-serif;
+        background: hsl(0 0% 100%);
+        color: hsl(0 0% 40%);
+        border: 1px solid hsl(0 0% 85%);
+        border-radius: 6px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s, background 0.15s;
+        z-index: 10;
+      `
+
+      btn.addEventListener('mouseenter', () => {
+        btn.style.background = 'hsl(0 0% 96%)'
+      })
+      btn.addEventListener('mouseleave', () => {
+        btn.style.background = 'hsl(0 0% 100%)'
+      })
+
+      btn.addEventListener('click', async () => {
+        const text = code.textContent || ''
+        try {
+          await navigator.clipboard.writeText(text)
+        } catch {
+          const ta = document.createElement('textarea')
+          ta.value = text
+          ta.style.position = 'fixed'
+          ta.style.left = '-9999px'
+          document.body.appendChild(ta)
+          ta.select()
+          document.execCommand('copy')
+          document.body.removeChild(ta)
+        }
+        btn.textContent = '✓ 已复制'
+        btn.style.color = 'hsl(0 0% 20%)'
+        setTimeout(() => {
+          btn.textContent = '复制'
+          btn.style.color = 'hsl(0 0% 40%)'
+        }, 2000)
+      })
+
+      pre.appendChild(btn)
+
+      pre.addEventListener('mouseenter', () => { btn.style.opacity = '1' })
+      pre.addEventListener('mouseleave', () => { btn.style.opacity = '0' })
+    })
+  }, [parts])
+
   return (
     <div className="prose">
       {parts.map((part, i) =>
