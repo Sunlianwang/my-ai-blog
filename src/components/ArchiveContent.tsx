@@ -168,7 +168,7 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
           <div className="border border-dashed border-border rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-editorial text-xl font-bold text-foreground">
-                📊 {t('archive.contributionGraph', 'Contribution Graph')}
+                📊 {t('archive.contributionGraph')}
               </h2>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span>Less</span>
@@ -346,69 +346,6 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Bottom ornament */}
-      <div className="flex justify-center pt-12">
-        <div className="flex items-center gap-3 text-muted-foreground/30">
-          <div className="w-8 h-px bg-current" />
-          <span className="text-xs font-mono tracking-widest">EOF</span>
-          <div className="w-8 h-px bg-current" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-                    {/* Article list under this month */}
-                    <div className="space-y-0 divide-y divide-border/40">
-                      {monthGroup.posts.map((post) => (
-                        <Link
-                          key={post.slug}
-                          href={`/posts/${post.slug}`}
-                          className="group block py-3.5 first:pt-0 last:pb-0"
-                        >
-                          <div className="flex items-start gap-4">
-                            <time className="text-xs font-mono text-muted-foreground tracking-wide mt-1.5 flex-shrink-0 w-20 tabular-nums">
-                              {post.date}
-                            </time>
-
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-editorial text-base font-bold text-foreground group-hover:text-primary transition-colors duration-200 leading-snug mb-1.5">
-                                {getLocalizedTitle(post, locale)}
-                              </h4>
-
-                              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-1 mb-2">
-                                {getLocalizedSummary(post, locale)}
-                              </p>
-
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {getLocalizedTags(post, locale).map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-
-                            <span className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1.5 opacity-0 group-hover:opacity-100">
-                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 8h10M9 4l4 4-4 4" />
-                              </svg>
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           ))}
