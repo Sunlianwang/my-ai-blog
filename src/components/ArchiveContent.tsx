@@ -91,6 +91,11 @@ function groupByYearMonth(posts: PostMeta[], monthFn: (m: number) => string): Ye
 export default function ArchiveContent({ posts }: ArchiveContentProps) {
   const { t, locale } = useI18n()
 
+  // Get month label helper - define before useMemo
+  const getMonthLabel = (m: number): string => {
+    return t(`month.${m}` as any)
+  }
+
   // State for collapsible years and months
   const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>({})
   const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({})
@@ -117,10 +122,6 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
   // Heatmap data
   const heatmapData = useMemo(() => generateHeatmapData(posts), [posts])
   const maxPostsPerDay = Math.max(...heatmapData.map(d => d.count), 1)
-
-  const getMonthLabel = (m: number): string => {
-    return t(`month.${m}` as any)
-  }
 
   const toggleYear = (year: string) => {
     setExpandedYears(prev => ({ ...prev, [year]: !prev[year] }))
