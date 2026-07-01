@@ -46,8 +46,6 @@ export const translations = {
   'archive.count': { zh: '篇文章', en: 'articles' },
   'archive.total': { zh: '共', en: 'Total' },
   'archive.empty': { zh: '暂无文章', en: 'No articles yet' },
-  'archive.contributionGraph': { zh: '贡献图', en: 'Contribution Graph' },
-
   // Search
   'search.placeholder': { zh: '搜索文章标题...', en: 'Search article titles...' },
   'search.noResults': { zh: '没有找到匹配的文章', en: 'No matching articles found' },

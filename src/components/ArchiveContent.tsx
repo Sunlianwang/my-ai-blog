@@ -20,43 +20,6 @@ interface YearGroup {
   count: number
 }
 
-// Heatmap cell intensity based on post count
-function getHeatColor(count: number, maxCount: number): string {
-  if (count === 0) return 'bg-muted'
-  const intensity = count / maxCount
-  if (intensity <= 0.25) return 'bg-green-200'
-  if (intensity <= 0.5) return 'bg-green-300'
-  if (intensity <= 0.75) return 'bg-green-400'
-  return 'bg-green-500'
-}
-
-// Generate heatmap data for the last 365 days
-function generateHeatmapData(posts: PostMeta[]) {
-  const today = new Date()
-  const postData = new Map<string, number>()
-
-  // Count posts per date
-  for (const post of posts) {
-    postData.set(post.date, (postData.get(post.date) || 0) + 1)
-  }
-
-  // Generate last 365 days data
-  const days: { date: string; count: number; label: string }[] = []
-  for (let i = 364; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
-    const dateStr = date.toISOString().split('T')[0]
-    const count = postData.get(dateStr) || 0
-    days.push({
-      date: dateStr,
-      count,
-      label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    })
-  }
-
-  return days
-}
-
 function groupByYearMonth(posts: PostMeta[], monthFn: (m: number) => string): YearGroup[] {
   const map = new Map<string, Map<string, PostMeta[]>>()
 
@@ -119,10 +82,6 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
     return groups
   }, [posts])
 
-  // Heatmap data
-  const heatmapData = useMemo(() => generateHeatmapData(posts), [posts])
-  const maxPostsPerDay = Math.max(...heatmapData.map(d => d.count), 1)
-
   const toggleYear = (year: string) => {
     setExpandedYears(prev => ({ ...prev, [year]: !prev[year] }))
   }
@@ -131,30 +90,6 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
     const key = `${year}-${monthKey}`
     setExpandedMonths(prev => ({ ...prev, [key]: !prev[key] }))
   }
-
-  // Group heatmap by weeks (for rendering)
-  const heatmapWeeks = useMemo(() => {
-    const weeks: typeof heatmapData[] = []
-    let currentWeek: typeof heatmapData = []
-    
-    for (let i = 0; i < heatmapData.length; i++) {
-      const day = heatmapData[i]
-      const date = new Date(day.date)
-      const dayOfWeek = date.getDay() // 0 = Sunday
-      
-      if (dayOfWeek === 0 && currentWeek.length > 0) {
-        weeks.push(currentWeek)
-        currentWeek = []
-      }
-      currentWeek.push(day)
-    }
-    
-    if (currentWeek.length > 0) {
-      weeks.push(currentWeek)
-    }
-    
-    return weeks
-  }, [heatmapData])
 
   return (
     <div className="max-w-none">
@@ -165,74 +100,6 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
         </div>
       ) : (
         <div className="space-y-16">
-          {/* Contribution Heatmap */}
-          <div className="border border-dashed border-border rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-editorial text-xl font-bold text-foreground">
-                📊 {t('archive.contributionGraph')}
-              </h2>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Less</span>
-                <div className="flex gap-0.5">
-                  <div className="w-3 h-3 bg-muted rounded-sm" />
-                  <div className="w-3 h-3 bg-green-200 rounded-sm" />
-                  <div className="w-3 h-3 bg-green-300 rounded-sm" />
-                  <div className="w-3 h-3 bg-green-400 rounded-sm" />
-                  <div className="w-3 h-3 bg-green-500 rounded-sm" />
-                </div>
-                <span>More</span>
-              </div>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <div className="min-w-[600px]">
-                {/* Week labels */}
-                <div className="flex gap-[3px] mb-1">
-                  <div className="w-[13px] flex-shrink-0" />
-                  <div className="flex-1 flex justify-between text-[10px] text-muted-foreground font-mono">
-                    <span>Jan</span><span>Feb</span><span>Mar</span>
-                    <span>Apr</span><span>May</span><span>Jun</span>
-                    <span>Jul</span><span>Aug</span><span>Sep</span>
-                    <span>Oct</span><span>Nov</span><span>Dec</span>
-                  </div>
-                </div>
-                
-                {/* Heatmap rows */}
-                <div className="flex gap-[3px]">
-                  {/* Day labels */}
-                  <div className="flex flex-col gap-[3px] w-[13px] flex-shrink-0 text-[9px] text-muted-foreground font-mono text-right pr-1">
-                    <span className="h-[13px] flex items-center">Mon</span>
-                    <span className="h-[13px] flex items-center">Wed</span>
-                    <span className="h-[13px] flex items-center">Fri</span>
-                  </div>
-                  
-                  {/* Grid */}
-                  <div className="flex-1 flex flex-col gap-[3px]">
-                    {heatmapWeeks.map((week, weekIndex) => (
-                      <div key={weekIndex} className="flex gap-[3px]">
-                        {week.map((day, dayIndex) => (
-                          <div
-                            key={day.date}
-                            className={`w-[13px] h-[13px] rounded-sm ${getHeatColor(day.count, maxPostsPerDay)} cursor-pointer transition-all duration-200 hover:ring-1 hover:ring-primary`}
-                            title={`${day.date}: ${day.count} post${day.count !== 1 ? 's' : ''}`}
-                          />
-                        ))}
-                        {/* Fill empty cells for weeks that don't start on Monday */}
-                        {weekIndex === 0 && heatmapWeeks[0]?.length < 7 && (
-                          <div className="flex gap-[3px]">
-                            {Array.from({ length: 7 - heatmapWeeks[0].length }).map((_, i) => (
-                              <div key={`empty-${i}`} className="w-[13px] h-[13px]" />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Year groups with collapsible functionality */}
           {yearGroups.map((group) => (
             <div key={group.year} className="relative">
