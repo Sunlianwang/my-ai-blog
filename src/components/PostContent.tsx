@@ -20,9 +20,129 @@ async function loadMermaid() {
   return mermaid
 }
 
+// ── Shared expand overlay ──────────────────────────────────────────
+function createExpandOverlay(options: {
+  headerLabel: string
+  renderBody: (container: HTMLElement) => void
+  showCopyBtn?: boolean
+  onCopy?: () => void
+}) {
+  const overlay = document.createElement('div')
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; animation: fadeIn 0.15s ease;
+  `
+
+  const modal = document.createElement('div')
+  modal.style.cssText = `
+    background: hsl(0 0% 100%); border-radius: 12px;
+    width: min(90vw, 900px); max-height: 85vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    overflow: hidden; animation: zoomIn 0.2s ease;
+  `
+
+  // Header
+  const header = document.createElement('div')
+  header.style.cssText = `
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid hsl(0 0% 90%);
+  `
+
+  const langLabel = document.createElement('span')
+  langLabel.textContent = options.headerLabel
+  langLabel.style.cssText = `
+    font-size: 12px; font-family: 'Inter', system-ui, sans-serif;
+    color: hsl(0 0% 50%); text-transform: uppercase; letter-spacing: 0.05em;
+  `
+
+  const headerBtns = document.createElement('div')
+  headerBtns.style.cssText = 'display: flex; gap: 6px;'
+
+  if (options.showCopyBtn && options.onCopy) {
+    const modalCopy = document.createElement('button')
+    modalCopy.textContent = 'Copy'
+    modalCopy.style.cssText = `
+      padding: 4px 12px; font-size: 12px;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: hsl(0 0% 96%); color: hsl(0 0% 30%);
+      border: 1px solid hsl(0 0% 85%); border-radius: 6px;
+      cursor: pointer; transition: background 0.15s;
+    `
+    modalCopy.addEventListener('mouseenter', () => { modalCopy.style.background = 'hsl(0 0% 92%)' })
+    modalCopy.addEventListener('mouseleave', () => { modalCopy.style.background = 'hsl(0 0% 96%)' })
+    modalCopy.addEventListener('click', () => {
+      options.onCopy!()
+      modalCopy.textContent = '✓ Copied'
+      setTimeout(() => { modalCopy.textContent = 'Copy' }, 2000)
+    })
+    headerBtns.appendChild(modalCopy)
+  }
+
+  const closeBtn = document.createElement('button')
+  closeBtn.textContent = '✕'
+  closeBtn.style.cssText = `
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; background: none; border: 1px solid hsl(0 0% 85%);
+    border-radius: 6px; cursor: pointer; color: hsl(0 0% 40%);
+    transition: background 0.15s;
+  `
+  closeBtn.addEventListener('mouseenter', () => { closeBtn.style.background = 'hsl(0 0% 96%)' })
+  closeBtn.addEventListener('mouseleave', () => { closeBtn.style.background = 'none' })
+  closeBtn.addEventListener('click', () => overlay.remove())
+
+  headerBtns.appendChild(closeBtn)
+  header.appendChild(langLabel)
+  header.appendChild(headerBtns)
+
+  // Body
+  const body = document.createElement('div')
+  body.style.cssText = `
+    overflow: auto; flex: 1; padding: 16px;
+    display: flex; align-items: center; justify-content: center;
+  `
+  options.renderBody(body)
+
+  modal.appendChild(header)
+  modal.appendChild(body)
+  overlay.appendChild(modal)
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove()
+  })
+
+  const onEsc = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      overlay.remove()
+      document.removeEventListener('keydown', onEsc)
+    }
+  }
+  document.addEventListener('keydown', onEsc)
+
+  document.body.appendChild(overlay)
+}
+
+// ── Enlarge button factory ────────────────────────────────────────
+const btnBase = `
+  padding: 4px 8px; font-size: 14px;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: hsl(0 0% 100%);
+  color: hsl(0 0% 40%);
+  border: 1px solid hsl(0 0% 85%);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.15s;
+  z-index: 10;
+  line-height: 1;
+`
+
 // 渲染单个 Mermaid 图表
 function MermaidChart({ code, loadingText, errorText }: { code: string; loadingText: string; errorText: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const id = useId().replace(/:/g, 'm')
 
   useEffect(() => {
@@ -47,12 +167,67 @@ function MermaidChart({ code, loadingText, errorText }: { code: string; loadingT
     return () => { cancelled = true }
   }, [code, id])
 
+  // Add enlarge button after SVG is rendered
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+
+    const addBtn = () => {
+      if (wrapper.querySelector('.mermaid-enlarge-btn')) return
+      const svg = wrapper.querySelector('svg')
+      if (!svg) return
+
+      wrapper.style.position = 'relative'
+
+      const btn = document.createElement('button')
+      btn.className = 'mermaid-enlarge-btn'
+      btn.textContent = '⤢'
+      btn.title = 'Enlarge diagram'
+      btn.style.cssText = btnBase + 'position: absolute; top: 8px; right: 8px;'
+
+      wrapper.addEventListener('mouseenter', () => { btn.style.opacity = '1' })
+      wrapper.addEventListener('mouseleave', () => { btn.style.opacity = '0' })
+      btn.addEventListener('mouseenter', () => { btn.style.background = 'hsl(0 0% 96%)' })
+      btn.addEventListener('mouseleave', () => { btn.style.background = 'hsl(0 0% 100%)' })
+
+      btn.addEventListener('click', () => {
+        createExpandOverlay({
+          headerLabel: 'diagram',
+          renderBody: (body) => {
+            const clone = svg.cloneNode(true) as SVGSVGElement
+            clone.style.cssText = 'max-width: 100%; max-height: 70vh; width: auto; height: auto;'
+            clone.removeAttribute('width')
+            clone.removeAttribute('height')
+            body.appendChild(clone)
+          },
+        })
+      })
+
+      wrapper.appendChild(btn)
+    }
+
+    // Wait for SVG to be rendered
+    const timer = setInterval(() => {
+      const svg = wrapper.querySelector('svg')
+      if (svg) {
+        clearInterval(timer)
+        addBtn()
+      }
+    }, 100)
+
+    setTimeout(() => clearInterval(timer), 5000)
+
+    return () => clearInterval(timer)
+  }, [])
+
   return (
     <div
-      ref={containerRef}
+      ref={wrapperRef}
       className="my-6 flex justify-center overflow-x-auto rounded-xl bg-muted/40 p-5 border border-border/60"
     >
-      <span className="text-muted-foreground text-sm">📊 {loadingText}</span>
+      <div ref={containerRef}>
+        <span className="text-muted-foreground text-sm">📊 {loadingText}</span>
+      </div>
     </div>
   )
 }
@@ -105,216 +280,150 @@ export default function PostContent({ html }: PostContentProps) {
     }
   }, [html])
 
-  // Add copy + enlarge buttons to all code blocks after render
+  // Inject enlarge + copy buttons for code blocks, images, and diagrams
   useEffect(() => {
     const proseEl = document.querySelector('.prose')
     if (!proseEl) return
 
-    const btnStyle = `
-      padding: 4px 10px;
-      font-size: 12px;
-      font-family: 'Inter', system-ui, sans-serif;
-      background: hsl(0 0% 100%);
-      color: hsl(0 0% 40%);
-      border: 1px solid hsl(0 0% 85%);
-      border-radius: 6px;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s, background 0.15s;
-      z-index: 10;
-    `
-
-    const showBtns = (btnGroup: HTMLDivElement) => {
-      btnGroup.querySelectorAll('button').forEach(b => { b.style.opacity = '1' })
+    const hoverShow = (el: HTMLElement) => {
+      el.querySelectorAll('.enlarge-btn').forEach(b => (b as HTMLElement).style.opacity = '1')
     }
-    const hideBtns = (btnGroup: HTMLDivElement) => {
-      btnGroup.querySelectorAll('button').forEach(b => { b.style.opacity = '0' })
+    const hoverHide = (el: HTMLElement) => {
+      el.querySelectorAll('.enlarge-btn').forEach(b => (b as HTMLElement).style.opacity = '0')
     }
 
+    // ── Helper: copy text ──
+    const copyText = async (text: string, btn?: HTMLElement) => {
+      try {
+        await navigator.clipboard.writeText(text)
+      } catch {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.style.position = 'fixed'
+        ta.style.left = '-9999px'
+        document.body.appendChild(ta)
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+      }
+      if (btn) {
+        const orig = btn.textContent || ''
+        btn.textContent = '✓ Copied'
+        btn.style.color = 'hsl(0 0% 20%)'
+        setTimeout(() => {
+          btn.textContent = orig
+          btn.style.color = 'hsl(0 0% 40%)'
+        }, 2000)
+      }
+    }
+
+    // ── 1. <pre> code blocks ──
     const pres = proseEl.querySelectorAll('pre')
     pres.forEach((pre) => {
       if (pre.querySelector('.code-actions')) return
-
-      pre.style.position = 'relative'
-
       const code = pre.querySelector('code')
       if (!code) return
 
-      // Button group container
+      pre.style.position = 'relative'
+
       const btnGroup = document.createElement('div')
       btnGroup.className = 'code-actions'
       btnGroup.style.cssText = `
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        display: flex;
-        gap: 4px;
-        z-index: 10;
+        position: absolute; top: 8px; right: 8px;
+        display: flex; gap: 4px; z-index: 10;
       `
 
-      // Copy button
-      const copyBtn = document.createElement('button')
-      copyBtn.textContent = 'Copy'
-      copyBtn.style.cssText = btnStyle
+      const makeBtn = (text: string, title: string, extraStyle = '') => {
+        const b = document.createElement('button')
+        b.textContent = text
+        b.title = title
+        b.className = 'enlarge-btn'
+        b.style.cssText = `
+          padding: 4px 10px; font-size: 12px;
+          font-family: 'Inter', system-ui, sans-serif;
+          background: hsl(0 0% 100%);
+          color: hsl(0 0% 40%);
+          border: 1px solid hsl(0 0% 85%);
+          border-radius: 6px; cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.2s, background 0.15s;
+          z-index: 10;
+          ${extraStyle}
+        `
+        b.addEventListener('mouseenter', () => { b.style.background = 'hsl(0 0% 96%)' })
+        b.addEventListener('mouseleave', () => { b.style.background = 'hsl(0 0% 100%)' })
+        return b
+      }
 
-      copyBtn.addEventListener('mouseenter', () => { copyBtn.style.background = 'hsl(0 0% 96%)' })
-      copyBtn.addEventListener('mouseleave', () => { copyBtn.style.background = 'hsl(0 0% 100%)' })
+      // Copy
+      const copyBtn = makeBtn('Copy', 'Copy code')
+      copyBtn.addEventListener('click', () => copyText(code.textContent || '', copyBtn))
 
-      copyBtn.addEventListener('click', async () => {
-        const text = code.textContent || ''
-        try {
-          await navigator.clipboard.writeText(text)
-        } catch {
-          const ta = document.createElement('textarea')
-          ta.value = text
-          ta.style.position = 'fixed'
-          ta.style.left = '-9999px'
-          document.body.appendChild(ta)
-          ta.select()
-          document.execCommand('copy')
-          document.body.removeChild(ta)
-        }
-        copyBtn.textContent = '✓ Copied'
-        copyBtn.style.color = 'hsl(0 0% 20%)'
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy'
-          copyBtn.style.color = 'hsl(0 0% 40%)'
-        }, 2000)
-      })
-
-      // Enlarge button
-      const enlargeBtn = document.createElement('button')
-      enlargeBtn.textContent = '⤢'
-      enlargeBtn.title = 'Expand'
-      enlargeBtn.style.cssText = btnStyle + 'font-size: 14px; padding: 4px 8px;'
-
-      enlargeBtn.addEventListener('mouseenter', () => { enlargeBtn.style.background = 'hsl(0 0% 96%)' })
-      enlargeBtn.addEventListener('mouseleave', () => { enlargeBtn.style.background = 'hsl(0 0% 100%)' })
-
+      // Enlarge
+      const enlargeBtn = makeBtn('⤢', 'Expand code', 'font-size: 14px; padding: 4px 8px;')
       enlargeBtn.addEventListener('click', () => {
         const text = code.textContent || ''
         const lang = (code.className.match(/language-(\w+)/) || [])[1] || ''
-
-        // Create modal
-        const overlay = document.createElement('div')
-        overlay.style.cssText = `
-          position: fixed; inset: 0; z-index: 1000;
-          background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-          display: flex; align-items: center; justify-content: center;
-          padding: 24px; animation: fadeIn 0.15s ease;
-        `
-
-        const modal = document.createElement('div')
-        modal.style.cssText = `
-          background: hsl(0 0% 100%); border-radius: 12px;
-          width: min(90vw, 900px); max-height: 85vh;
-          display: flex; flex-direction: column;
-          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-          overflow: hidden; animation: zoomIn 0.2s ease;
-        `
-
-        // Modal header
-        const header = document.createElement('div')
-        header.style.cssText = `
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 12px 16px; border-bottom: 1px solid hsl(0 0% 90%);
-        `
-
-        const langLabel = document.createElement('span')
-        langLabel.textContent = lang || 'code'
-        langLabel.style.cssText = `
-          font-size: 12px; font-family: 'Inter', system-ui, sans-serif;
-          color: hsl(0 0% 50%); text-transform: uppercase; letter-spacing: 0.05em;
-        `
-
-        const headerBtns = document.createElement('div')
-        headerBtns.style.cssText = 'display: flex; gap: 6px;'
-
-        const modalCopy = document.createElement('button')
-        modalCopy.textContent = 'Copy'
-        modalCopy.style.cssText = `
-          padding: 4px 12px; font-size: 12px;
-          font-family: 'Inter', system-ui, sans-serif;
-          background: hsl(0 0% 96%); color: hsl(0 0% 30%);
-          border: 1px solid hsl(0 0% 85%); border-radius: 6px;
-          cursor: pointer; transition: background 0.15s;
-        `
-        modalCopy.addEventListener('mouseenter', () => { modalCopy.style.background = 'hsl(0 0% 92%)' })
-        modalCopy.addEventListener('mouseleave', () => { modalCopy.style.background = 'hsl(0 0% 96%)' })
-        modalCopy.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(text)
-          } catch {
-            const ta = document.createElement('textarea')
-            ta.value = text
-            ta.style.position = 'fixed'
-            ta.style.left = '-9999px'
-            document.body.appendChild(ta)
-            ta.select()
-            document.execCommand('copy')
-            document.body.removeChild(ta)
-          }
-          modalCopy.textContent = '✓ Copied'
-          setTimeout(() => { modalCopy.textContent = 'Copy' }, 2000)
+        createExpandOverlay({
+          headerLabel: lang || 'code',
+          showCopyBtn: true,
+          onCopy: () => copyText(text),
+          renderBody: (body) => {
+            body.style.cssText = `
+              overflow: auto; flex: 1; padding: 16px;
+              font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+              font-size: 14px; line-height: 1.6;
+              color: hsl(0 0% 15%);
+              white-space: pre; tab-size: 2;
+              display: block;
+            `
+            const codeEl = document.createElement('code')
+            codeEl.textContent = text
+            body.appendChild(codeEl)
+          },
         })
-
-        const closeBtn = document.createElement('button')
-        closeBtn.textContent = '✕'
-        closeBtn.style.cssText = `
-          width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-          font-size: 14px; background: none; border: 1px solid hsl(0 0% 85%);
-          border-radius: 6px; cursor: pointer; color: hsl(0 0% 40%);
-          transition: background 0.15s;
-        `
-        closeBtn.addEventListener('mouseenter', () => { closeBtn.style.background = 'hsl(0 0% 96%)' })
-        closeBtn.addEventListener('mouseleave', () => { closeBtn.style.background = 'none' })
-        closeBtn.addEventListener('click', () => overlay.remove())
-
-        headerBtns.appendChild(modalCopy)
-        headerBtns.appendChild(closeBtn)
-        header.appendChild(langLabel)
-        header.appendChild(headerBtns)
-
-        // Modal body
-        const body = document.createElement('div')
-        body.style.cssText = `
-          overflow: auto; flex: 1; padding: 16px;
-          font-family: 'IBM Plex Mono', 'Fira Code', monospace;
-          font-size: 14px; line-height: 1.6;
-          color: hsl(0 0% 15%);
-          white-space: pre; tab-size: 2;
-        `
-        const codeEl = document.createElement('code')
-        codeEl.textContent = text
-        body.appendChild(codeEl)
-
-        modal.appendChild(header)
-        modal.appendChild(body)
-        overlay.appendChild(modal)
-
-        // Close on overlay click
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) overlay.remove()
-        })
-
-        // Close on Escape
-        const onEsc = (e: KeyboardEvent) => {
-          if (e.key === 'Escape') {
-            overlay.remove()
-            document.removeEventListener('keydown', onEsc)
-          }
-        }
-        document.addEventListener('keydown', onEsc)
-
-        document.body.appendChild(overlay)
       })
 
       btnGroup.appendChild(copyBtn)
       btnGroup.appendChild(enlargeBtn)
       pre.appendChild(btnGroup)
+      pre.addEventListener('mouseenter', () => hoverShow(btnGroup))
+      pre.addEventListener('mouseleave', () => hoverHide(btnGroup))
+    })
 
-      pre.addEventListener('mouseenter', () => showBtns(btnGroup))
-      pre.addEventListener('mouseleave', () => hideBtns(btnGroup))
+    // ── 2. <img> elements ──
+    const imgs = proseEl.querySelectorAll('img')
+    imgs.forEach((img) => {
+      if (img.parentElement?.querySelector('.img-enlarge-btn')) return
+
+      const wrapper = document.createElement('span')
+      wrapper.style.cssText = 'position: relative; display: inline-block;'
+      img.parentNode?.insertBefore(wrapper, img)
+      wrapper.appendChild(img)
+
+      const btn = document.createElement('button')
+      btn.className = 'img-enlarge-btn enlarge-btn'
+      btn.textContent = '⤢'
+      btn.title = 'Enlarge image'
+      btn.style.cssText = btnBase + 'position: absolute; top: 8px; right: 8px;'
+
+      wrapper.addEventListener('mouseenter', () => { btn.style.opacity = '1' })
+      wrapper.addEventListener('mouseleave', () => { btn.style.opacity = '0' })
+      btn.addEventListener('mouseenter', () => { btn.style.background = 'hsl(0 0% 96%)' })
+      btn.addEventListener('mouseleave', () => { btn.style.background = 'hsl(0 0% 100%)' })
+
+      btn.addEventListener('click', () => {
+        createExpandOverlay({
+          headerLabel: 'image',
+          renderBody: (body) => {
+            const clone = img.cloneNode(true) as HTMLImageElement
+            clone.style.cssText = 'max-width: 100%; max-height: 70vh; width: auto; height: auto; border-radius: 8px;'
+            body.appendChild(clone)
+          },
+        })
+      })
+
+      wrapper.appendChild(btn)
     })
   }, [parts])
 
