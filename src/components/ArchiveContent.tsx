@@ -54,7 +54,6 @@ function groupByYearMonth(posts: PostMeta[], monthFn: (m: number) => string): Ye
 export default function ArchiveContent({ posts }: ArchiveContentProps) {
   const { t, locale } = useI18n()
 
-  // Get month label helper - define before useMemo
   const getMonthLabel = (m: number): string => {
     return t(`month.${m}` as any)
   }
@@ -80,7 +79,7 @@ export default function ArchiveContent({ posts }: ArchiveContentProps) {
     setExpandedMonths(initialMonths)
     
     return groups
-  }, [posts])
+  }, [posts, t])
 
   const toggleYear = (year: string) => {
     setExpandedYears(prev => ({ ...prev, [year]: !prev[year] }))
